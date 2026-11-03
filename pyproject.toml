@@ -1,6 +1,6 @@
 [project]
 name = "mealie-agent-mcp"
-version = "0.1.0"
+version = "0.1.1"
 description = "A curated, security-minded MCP server for Mealie v3 (recipes, meal plans, shopping lists)"
 readme = "README.md"
 license = "MIT"
