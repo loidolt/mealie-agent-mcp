@@ -1,0 +1,36 @@
+# Throwaway Mealie for local development and integration tests.
+#   docker compose -f dev/compose.yaml up -d mealie
+#   uv run python dev/bootstrap_mealie.py   # creates an API token, prints env vars
+# The mcp service runs this server in bearer mode against it:
+#   docker compose -f dev/compose.yaml --profile mcp up -d --build
+name: mealie-agent-mcp-dev
+
+services:
+  mealie:
+    image: ghcr.io/mealie-recipes/mealie:v3.30.0
+    ports:
+      - "127.0.0.1:9925:9000"
+    environment:
+      ALLOW_SIGNUP: "false"
+      BASE_URL: http://localhost:9925
+      TZ: UTC
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:9000/api/app/about')"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+
+  mcp:
+    profiles: [mcp]
+    build: ..
+    depends_on:
+      mealie:
+        condition: service_healthy
+    ports:
+      - "127.0.0.1:${MCP_HOST_PORT:-8000}:8000"
+    environment:
+      MEALIE_URL: http://mealie:9000
+      MEALIE_PUBLIC_URL: http://localhost:9925
+      MEALIE_API_TOKEN: ${MEALIE_API_TOKEN:-}
+      MEALIE_MCP_AUTH_MODE: bearer
+      MEALIE_MCP_BEARER_TOKENS: ${MEALIE_MCP_BEARER_TOKENS:-dev-token-change-me}
