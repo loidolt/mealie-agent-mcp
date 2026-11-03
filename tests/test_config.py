@@ -116,3 +116,11 @@ def test_authenticated_remote_bind_ok() -> None:
     ).check_bind_safety()
     make_settings(transport="http", host="127.0.0.1").check_bind_safety()
     make_settings(transport="stdio", host="0.0.0.0").check_bind_safety()
+
+
+def test_oidc_forward_resource_defaults_off(monkeypatch: pytest.MonkeyPatch) -> None:
+    assert make_settings().oidc_forward_resource is False
+    monkeypatch.setenv("MEALIE_URL", "http://m")
+    monkeypatch.setenv("MEALIE_API_TOKEN", "t")
+    monkeypatch.setenv("MEALIE_MCP_OIDC_FORWARD_RESOURCE", "true")
+    assert Settings.load().oidc_forward_resource is True

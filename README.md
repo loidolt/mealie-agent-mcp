@@ -125,6 +125,7 @@ All configuration is through environment variables. CLI flags (`--transport`, `-
 | `MEALIE_MCP_OIDC_SCOPES` | `openid,profile,email` | `oidc`: scopes requested from the provider |
 | `MEALIE_MCP_OIDC_AUDIENCE` | | `oidc`: `audience` parameter, for providers that need one |
 | `MEALIE_MCP_OIDC_VERIFY_ID_TOKEN` | `true` | `oidc`: verify the provider's ID token (always a JWT) instead of its access token (opaque at some providers, e.g. Authelia) |
+| `MEALIE_MCP_OIDC_FORWARD_RESOURCE` | `false` | `oidc`: pass the MCP client's RFC 8707 `resource` on to the provider. Strict providers such as Pocket ID ≥ 2.19 reject unknown resources ("The 'resource' or 'scope' parameter is invalid"); set `true` only if your provider needs it to set the token audience |
 | `MEALIE_MCP_OIDC_ALLOWED_CLIENT_REDIRECT_URIS` | any | `oidc`: comma-separated patterns of MCP-client callback URLs allowed to register, e.g. `https://claude.ai/api/mcp/auth_callback,http://localhost:*` |
 | `MEALIE_MCP_JWT_SIGNING_KEY` | derived from client secret | `oidc`: key for the tokens this server issues to MCP clients |
 | `MEALIE_MCP_STATE_DIR` | FastMCP data dir (`/data`) | `oidc`: where client registrations and encrypted upstream tokens are stored. Persist it |

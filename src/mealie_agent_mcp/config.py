@@ -99,6 +99,9 @@ class Settings(BaseSettings):
     oidc_verify_id_token: bool = Field(
         default=True, validation_alias=_env("MEALIE_MCP_OIDC_VERIFY_ID_TOKEN")
     )
+    oidc_forward_resource: bool = Field(
+        default=False, validation_alias=_env("MEALIE_MCP_OIDC_FORWARD_RESOURCE")
+    )
     oidc_allowed_client_redirect_uris: Annotated[list[str] | None, NoDecode] = Field(
         default=None, validation_alias=_env("MEALIE_MCP_OIDC_ALLOWED_CLIENT_REDIRECT_URIS")
     )

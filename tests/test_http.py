@@ -166,3 +166,44 @@ async def test_oidc_mode_publishes_oauth_metadata(
             )
             assert authorize.status_code >= 400
     assert (tmp_path / "oauth-proxy").is_dir(), "OAuth state belongs in MEALIE_MCP_STATE_DIR"
+
+
+@pytest.mark.parametrize("forward", [False, True])
+def test_oidc_forward_resource(tmp_path: Path, forward: bool) -> None:
+    """Strict RFC 8707 providers (Pocket ID >= 2.19) reject an unknown `resource`,
+    so it is only sent upstream when explicitly enabled."""
+    from urllib.parse import parse_qs, urlparse
+
+    from fastmcp.server.auth import OAuthProxy
+
+    from mealie_agent_mcp.auth import build_auth
+
+    from .conftest import make_settings
+
+    with serve_in_thread(fake_idp()) as idp_url:
+        overrides: dict[str, Any] = {"oidc_forward_resource": True} if forward else {}
+        auth = build_auth(
+            make_settings(
+                transport="http",
+                auth_mode="oidc",
+                base_url="https://mcp.example.com",
+                oidc_issuer=idp_url,
+                oidc_client_id="mealie-mcp",
+                oidc_client_secret="s3cret",
+                state_dir=str(tmp_path),
+                **overrides,
+            )
+        )
+    assert isinstance(auth, OAuthProxy)
+    url = auth._build_upstream_authorize_url(
+        "txn-1",
+        {"resource": "https://mcp.example.com/mcp", "scopes": ["openid", "profile", "email"]},
+    )
+    query = parse_qs(urlparse(url).query)
+    assert url.startswith(f"{idp_url}/authorize?")
+    assert query["redirect_uri"] == ["https://mcp.example.com/auth/callback"]
+    assert query["scope"] == ["openid profile email"]
+    if forward:
+        assert query["resource"] == ["https://mcp.example.com/mcp"]
+    else:
+        assert "resource" not in query

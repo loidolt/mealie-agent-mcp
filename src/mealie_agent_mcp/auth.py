@@ -61,6 +61,10 @@ def build_auth(settings: Settings) -> AuthProvider | None:
         base_url=settings.base_url,
         required_scopes=settings.oidc_scopes or None,
         verify_id_token=settings.oidc_verify_id_token,
+        # The provider is only used for login; this server issues its own tokens
+        # for the MCP resource. Forwarding the client's RFC 8707 `resource` makes
+        # strict providers (Pocket ID >= 2.19) reject the authorization request.
+        forward_resource=settings.oidc_forward_resource,
         allowed_client_redirect_uris=settings.oidc_allowed_client_redirect_uris,
         jwt_signing_key=(
             settings.jwt_signing_key.get_secret_value() if settings.jwt_signing_key else None
