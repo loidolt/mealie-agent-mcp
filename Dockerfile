@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1.7
 ARG PYTHON_IMAGE=python:3.13-slim-trixie
 
-FROM ghcr.io/astral-sh/uv:0.9.22 AS uv
+FROM ghcr.io/astral-sh/uv:0.13.7 AS uv
 
 FROM ${PYTHON_IMAGE} AS build
 COPY --from=uv /uv /usr/local/bin/uv
